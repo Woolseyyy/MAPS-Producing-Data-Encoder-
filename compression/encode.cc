@@ -58,8 +58,9 @@ bool EncodePointCloudToBuffer(const PointCloud &pc,
                               EncoderBuffer *out_buffer) {
   std::unique_ptr<PointCloudEncoder> encoder;
   const int encoding_method = options.GetGlobalInt("encoding_method", -1);
-  if (encoding_method == POINT_CLOUD_KD_TREE_ENCODING ||
-      (options.GetSpeed() < 10 && pc.num_attributes() == 1)) {
+  //if (encoding_method == POINT_CLOUD_KD_TREE_ENCODING ||
+  //    (options.GetSpeed() < 10 && pc.num_attributes() == 1)) {
+  if (false) {
     const PointAttribute *const att = pc.attribute(0);
     bool create_kd_tree_encoder = true;
     // Kd-Tree encoder can be currently used only under following conditions:

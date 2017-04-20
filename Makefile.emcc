@@ -226,6 +226,9 @@ PLY_DECODER_OBJS := core/hash_utils.o io/ply_decoder.o
 PLY_ENCODER_A    := libply_encoder.a
 PLY_ENCODER_OBJS := io/ply_encoder.o
 
+MAPS_DECODER_A    := libmaps_decoder.a
+MAPS_DECODER_OBJS := core/hash_utils.o io/maps_decoder.o
+
 MESH_IO_A    := libmesh_io.a
 MESH_IO_OBJS := io/mesh_io.o
 
@@ -346,6 +349,7 @@ OBJ_DECODER_OBJSA := $(addprefix $(OBJDIR)/,$(OBJ_DECODER_OBJS:.o=_a.o))
 MESH_IO_OBJSA := $(addprefix $(OBJDIR)/,$(MESH_IO_OBJS:.o=_a.o))
 PLY_ENCODER_OBJSA := $(addprefix $(OBJDIR)/,$(PLY_ENCODER_OBJS:.o=_a.o))
 PLY_DECODER_OBJSA := $(addprefix $(OBJDIR)/,$(PLY_DECODER_OBJS:.o=_a.o))
+MAPS_DECODER_OBJSA := $(addprefix $(OBJDIR)/,$(MAPS_DECODER_OBJS:.o=_a.o))
 
 FLOAT_POINTS_TREE_DECODER_OBJSA := \
     $(addprefix $(OBJDIR)/,$(FLOAT_POINTS_TREE_DECODER_OBJS:.o=_a.o))
@@ -415,6 +419,7 @@ DRACO_DECODER_OBJSA += $(DECODE_OBJSA)
 # I/O objs
 DRACO_IO_OBJSA := $(OBJ_DECODER_OBJSA) $(MESH_IO_OBJSA)
 DRACO_IO_OBJSA += $(PLY_ENCODER_OBJSA) $(PLY_DECODER_OBJSA)
+DRACO_IO_OBJSA += $(MAPS_ENCODER_OBJSA) $(MAPS_DECODER_OBJSA)
 
 # All objs
 DRACO_OBJSA := $(DRACO_SHARED_OBJSA)
@@ -428,6 +433,7 @@ LIBS := $(LIBDIR)/libmesh_io.a
 LIBS += $(LIBDIR)/libply_decoder.a
 LIBS += $(LIBDIR)/libply_encoder.a
 LIBS += $(LIBDIR)/libobj_decoder.a
+LIBS += $(LIBDIR)/libmaps_decoder.a
 LIBS += $(LIBDIR)/libgeometry_attribute.a
 LIBS += $(LIBDIR)/libpoint_cloud.a
 LIBS += $(LIBDIR)/libpoint_attribute.a
@@ -624,6 +630,9 @@ $(LIBDIR)/libply_encoder.a: $(PLY_ENCODER_OBJSA)
 	$(AR) rcs $@ $^
 
 $(LIBDIR)/libply_decoder.a: $(PLY_DECODER_OBJSA)
+	$(AR) rcs $@ $^
+
+$(LIBDIR)/libmaps_decoder.a: $(MAPS_DECODER_OBJSA)
 	$(AR) rcs $@ $^
 
 $(LIBDIR)/libfloat_points_tree_decoder.a: $(FLOAT_POINTS_TREE_DECODER_OBJSA)

@@ -321,6 +321,8 @@ set(draco_io_sources
     "${draco_root}/io/ply_property_writer.h"
     "${draco_root}/io/ply_reader.cc"
     "${draco_root}/io/ply_reader.h"
+    "${draco_root}/io/maps_decoder.cc"
+    "${draco_root}/io/maps_decoder.h"
     "${draco_root}/io/point_cloud_io.cc"
     "${draco_root}/io/point_cloud_io.h")
 
@@ -554,6 +556,9 @@ else ()
   add_executable(draco_encoder
                  "${draco_root}/tools/draco_encoder.cc")
   target_link_libraries(draco_encoder PUBLIC draco)
+  add_executable(MAPS_encoder
+          "${draco_root}/tools/MAPS_encoder.cc")
+  target_link_libraries(MAPS_encoder PUBLIC draco)
 
   if (ENABLE_TESTS)
     add_executable(draco_tests ${draco_test_sources})
@@ -573,6 +578,6 @@ else ()
 
   # Add install rules for lib and executable targets.
   install(TARGETS dracodec draco DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
-  install(TARGETS draco_decoder draco_encoder DESTINATION
+  install(TARGETS draco_decoder draco_encoder MAPS_encoder DESTINATION
           "${CMAKE_INSTALL_PREFIX}/bin")
 endif ()

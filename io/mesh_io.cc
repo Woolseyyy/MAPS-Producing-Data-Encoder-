@@ -19,6 +19,7 @@
 #include "io/obj_decoder.h"
 #include "io/parser_utils.h"
 #include "io/ply_decoder.h"
+#include "io/maps_decoder.h"
 
 namespace draco {
 
@@ -39,6 +40,14 @@ std::unique_ptr<Mesh> ReadMeshFromFile(const std::string &file_name) {
     PlyDecoder ply_decoder;
     if (!ply_decoder.DecodeFromFile(file_name, mesh.get()))
       return nullptr;
+    return mesh;
+  }
+  if (extension == ".maps") {
+    // Wavefront maps file format.
+    MapsDecoder maps_decoder;
+    if(!maps_decoder.DecodeFromFile(file_name, mesh.get()))
+      return nullptr;
+
     return mesh;
   }
 
