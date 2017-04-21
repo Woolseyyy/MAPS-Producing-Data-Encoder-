@@ -228,19 +228,21 @@ int main(int argc, char **argv) {
     MapsDecoder maps_decoder;
     maps_decoder.BufferFromFile(options.input);
     int ret[2] = {-1, -1};
-    for(int i=0; i<1; i++) {
+    for(int i=0; i<2; i++) {
         std::unique_ptr<draco::PointCloud> pc;
         draco::Mesh *mesh = nullptr;
 
 
         if(i==0){//encode mesh
-            std::unique_ptr<draco::Mesh> in_mesh;
+            std::unique_ptr<draco::Mesh> in_mesh(new draco::Mesh());
             maps_decoder.Decode(in_mesh.get());
             mesh = in_mesh.get();
             pc = std::move(in_mesh);
         }
         else{//encode vector
-
+            std::unique_ptr<draco::PointCloud> in_pc(new draco::PointCloud());
+            maps_decoder.Decode(in_pc.get());
+            pc = std::move(in_pc);
         }
 
         // Setup encoder options.
@@ -264,11 +266,16 @@ int main(int argc, char **argv) {
         const int speed = 10 - options.compression_level;
         draco::SetSpeedOptions(&encoder_options, speed, speed);
 
-        if (options.output.empty()) {
-            // Create a default output file by attaching .drc to the input file name.
-            options.output = options.input + ".drc";
+        // Create a default output file by attaching .drc to the input file name.
+        if(i==0){
+            char type[]= ".mesh";
+            options.output = options.input +  type + ".drc";
         }
-
+        else{
+            char type[]= ".vector";
+            options.output = options.input +  type + ".drc";
+        }
+        
         PrintOptions(*pc.get(), options);
 
 
