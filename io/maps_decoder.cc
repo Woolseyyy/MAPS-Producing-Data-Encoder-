@@ -14,12 +14,19 @@
 void int2str(const int &int_temp, char* num);
 std::vector<std::string> split(std::basic_string<char, std::char_traits<char>, std::allocator<char>> str, const char* c);
 
-bool MapsDecoder::DecodeFromFile(const std::string &file_name, draco::Mesh *out_mesh){
+void MapsDecoder::BufferFromFile(const std::string &file_name){
     readFile(file_name);
     ProducePlyBuffer();
-    printf("in!");
+}
+
+bool MapsDecoder::Decode(draco::Mesh *out_mesh){
     draco::PlyDecoder ply_decoder;
-    return ply_decoder.DecodeFromBuffer(&buffer_,out_mesh);
+    return ply_decoder.DecodeFromBuffer(&mesh_buffer_,out_mesh) ;
+}
+
+bool MapsDecoder::Decode(draco::PointCloud *out_point_cloud){
+    draco::PlyDecoder ply_decoder;
+    return ply_decoder.DecodeFromBuffer(&mesh_buffer_,out_point_cloud) ;
 }
 
 void MapsDecoder::readFile(const std::string &file_name){
@@ -60,7 +67,12 @@ void MapsDecoder::readFile(const std::string &file_name){
     file.close();
 }
 
-bool MapsDecoder::ProducePlyBuffer(){
+void MapsDecoder::ProducePlyBuffer() {
+    ProduceMeshPlyBuffer();
+    ProduceVectorPlyBuffer();
+}
+
+void MapsDecoder::ProduceMeshPlyBuffer(){
     char* temp_buffer = (char*)malloc(sizeof(char[255])*(bv_num+sv_num+bf_num+9));
 
     strcpy(temp_buffer, ""
@@ -83,7 +95,29 @@ bool MapsDecoder::ProducePlyBuffer(){
     strcat(temp_buffer, bv);
     strcat(temp_buffer, bf);
 
-    buffer_.Init(&temp_buffer[0], strlen(temp_buffer));
+    mesh_buffer_.Init(&temp_buffer[0], strlen(temp_buffer));
+}
+
+void MapsDecoder::ProduceVectorPlyBuffer(){
+    char* temp_buffer = (char*)malloc(sizeof(char[255])*(bv_num+sv_num+bf_num+9));
+
+    strcpy(temp_buffer, ""
+            "ply\n"
+            "format ascii 1.0\n"
+            "element vertex ");
+    strcat(temp_buffer, sv_num_str);
+    strcat(temp_buffer, "\n");
+    strcat(temp_buffer, ""
+            "property   float32   x\n"
+            "property   float32   y\n"
+            "property   float32   z\n"
+            "element face 0\n"
+            "property list uchar int vertex_indices\n"
+            "end_header\n");
+
+    strcat(temp_buffer, sv);
+
+    vector_buffer_.Init(&temp_buffer[0], strlen(temp_buffer));
 }
 
 std::vector<std::string> split(std::basic_string<char, std::char_traits<char>, std::allocator<char>> str, const char* c)

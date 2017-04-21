@@ -42,14 +42,6 @@ std::unique_ptr<Mesh> ReadMeshFromFile(const std::string &file_name) {
       return nullptr;
     return mesh;
   }
-  if (extension == ".mps") {
-    // Wavefront maps file format.
-    MapsDecoder maps_decoder;
-    if(!maps_decoder.DecodeFromFile(file_name, mesh.get()))
-      return nullptr;
-
-    return mesh;
-  }
 
   // Otherwise not an obj file. Assume the file was encoded with one of the
   // draco encoding methods.

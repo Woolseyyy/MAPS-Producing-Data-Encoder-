@@ -15,6 +15,7 @@
 #include <cinttypes>
 #include <cstdlib>
 #include <fstream>
+#include <io/maps_decoder.h>
 
 #include "compression/encode.h"
 #include "core/cycle_timer.h"
@@ -204,6 +205,7 @@ int main(int argc, char **argv) {
     }*/
     options.input = "sb.mps";
 
+    /*
     std::unique_ptr<draco::PointCloud> pc;
     draco::Mesh *mesh = nullptr;
     if (!options.is_point_cloud) {
@@ -222,46 +224,66 @@ int main(int argc, char **argv) {
             return -1;
         }
     }
+     */
+    MapsDecoder maps_decoder;
+    maps_decoder.BufferFromFile(options.input);
+    int ret[2] = {-1, -1};
+    for(int i=0; i<1; i++) {
+        std::unique_ptr<draco::PointCloud> pc;
+        draco::Mesh *mesh = nullptr;
 
-    // Setup encoder options.
-    draco::EncoderOptions encoder_options = draco::CreateDefaultEncoderOptions();
-    if (options.pos_quantization_bits > 0) {
-        draco::SetNamedAttributeQuantization(&encoder_options, *pc.get(),
-                                             draco::GeometryAttribute::POSITION,
-                                             options.pos_quantization_bits);
+
+        if(i==0){//encode mesh
+            std::unique_ptr<draco::Mesh> in_mesh;
+            maps_decoder.Decode(in_mesh.get());
+            mesh = in_mesh.get();
+            pc = std::move(in_mesh);
+        }
+        else{//encode vector
+
+        }
+
+        // Setup encoder options.
+        draco::EncoderOptions encoder_options = draco::CreateDefaultEncoderOptions();
+        if (options.pos_quantization_bits > 0) {
+            draco::SetNamedAttributeQuantization(&encoder_options, *pc.get(),
+                                                 draco::GeometryAttribute::POSITION,
+                                                 options.pos_quantization_bits);
+        }
+        if (options.tex_coords_quantization_bits > 0) {
+            draco::SetNamedAttributeQuantization(&encoder_options, *pc.get(),
+                                                 draco::GeometryAttribute::TEX_COORD,
+                                                 options.tex_coords_quantization_bits);
+        }
+        if (options.normals_quantization_bits > 0) {
+            draco::SetNamedAttributeQuantization(&encoder_options, *pc.get(),
+                                                 draco::GeometryAttribute::NORMAL,
+                                                 options.normals_quantization_bits);
+        }
+        // Convert compression level to speed (that 0 = slowest, 10 = fastest).
+        const int speed = 10 - options.compression_level;
+        draco::SetSpeedOptions(&encoder_options, speed, speed);
+
+        if (options.output.empty()) {
+            // Create a default output file by attaching .drc to the input file name.
+            options.output = options.input + ".drc";
+        }
+
+        PrintOptions(*pc.get(), options);
+
+
+        if (mesh && mesh->num_faces() > 0)
+            ret[i] = EncodeMeshToFile(*mesh, encoder_options, options.output);
+        else
+            ret[i] = EncodePointCloudToFile(*pc.get(), encoder_options, options.output);
+
+        if (ret[i] != -1 && options.compression_level < 10) {
+            printf(
+                    "For better compression, increase the compression level '-cl' (up to "
+                            "10).\n\n");
+        }
+
     }
-    if (options.tex_coords_quantization_bits > 0) {
-        draco::SetNamedAttributeQuantization(&encoder_options, *pc.get(),
-                                             draco::GeometryAttribute::TEX_COORD,
-                                             options.tex_coords_quantization_bits);
-    }
-    if (options.normals_quantization_bits > 0) {
-        draco::SetNamedAttributeQuantization(&encoder_options, *pc.get(),
-                                             draco::GeometryAttribute::NORMAL,
-                                             options.normals_quantization_bits);
-    }
-    // Convert compression level to speed (that 0 = slowest, 10 = fastest).
-    const int speed = 10 - options.compression_level;
-    draco::SetSpeedOptions(&encoder_options, speed, speed);
 
-    if (options.output.empty()) {
-        // Create a default output file by attaching .drc to the input file name.
-        options.output = options.input + ".drc";
-    }
-
-    PrintOptions(*pc.get(), options);
-
-    int ret = -1;
-    if (mesh && mesh->num_faces() > 0)
-        ret = EncodeMeshToFile(*mesh, encoder_options, options.output);
-    else
-        ret = EncodePointCloudToFile(*pc.get(), encoder_options, options.output);
-
-    if (ret != -1 && options.compression_level < 10) {
-        printf(
-                "For better compression, increase the compression level '-cl' (up to "
-                        "10).\n\n");
-    }
-
-    return ret;
+    return ret[0] && ret[1];
 }

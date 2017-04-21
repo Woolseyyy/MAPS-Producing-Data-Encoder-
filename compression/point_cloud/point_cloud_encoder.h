@@ -82,7 +82,7 @@ class PointCloudEncoder {
 
   // encode all attribute values. The attribute encoders are sorted to resolve
   // any attribute dependencies and all the encoded data is stored into the
-  // |buffer_|.
+  // |mesh_buffer_|.
   // Returns false if the encoding failed.
   virtual bool EncodePointAttributes();
 

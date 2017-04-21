@@ -13,8 +13,9 @@
 
 class MapsDecoder {
 public:
-    bool DecodeFromFile(const std::string &file_name, draco::Mesh *out_mesh);
-    bool ProducePlyBuffer();
+    void BufferFromFile(const std::string &file_name);
+    bool Decode(draco::Mesh *out_mesh);
+    bool Decode(draco::PointCloud *out_point_cloud);
 
 private:
     char bv_num_str[255];
@@ -26,8 +27,12 @@ private:
     char bf_num_str[255];
     int bf_num;
     char* bf;
-    draco::DecoderBuffer buffer_;
+    draco::DecoderBuffer mesh_buffer_;
+    draco::DecoderBuffer vector_buffer_;
 
+    void ProducePlyBuffer();
+    void ProduceMeshPlyBuffer();
+    void ProduceVectorPlyBuffer();
     void readFile(const std::string &file_name);
 };
 
