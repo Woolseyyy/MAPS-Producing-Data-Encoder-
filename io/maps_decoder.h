@@ -2,8 +2,8 @@
 // Created by admin on 2017/4/21.
 //
 
-#ifndef DRACO_MAPSDECODER_H
-#define DRACO_MAPSDECODER_H
+#ifndef DRACO_IO_MESH_MAPS_DECODER_H_
+#define DRACO_IO_MESH_MAPS_DECODER_H_
 
 #include <string>
 
@@ -13,17 +13,20 @@
 
 class MapsDecoder {
 public:
-    bool DecodeFromFile(const std::string &file_name, Mesh *out_mesh);
-    bool ProducePlyBuffer(DecoderBuffer* buffer);
+    bool DecodeFromFile(const std::string &file_name, draco::Mesh *out_mesh);
+    bool ProducePlyBuffer();
 
 private:
+    char bv_num_str[255];
     int bv_num;
-    char bv[0];
+    char* bv;
+    char sv_num_str[255];
     int sv_num;
-    char sv[0];
+    char* sv;
+    char bf_num_str[255];
     int bf_num;
-    char bf[0];
-    DecoderBuffer buffer_;
+    char* bf;
+    draco::DecoderBuffer buffer_;
 
     void readFile(const std::string &file_name);
 };

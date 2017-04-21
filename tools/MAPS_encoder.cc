@@ -154,10 +154,13 @@ namespace {
 }  // anonymous namespace
 
 int main(int argc, char **argv) {
+
+
+
     Options options;
     const int argc_check = argc - 1;
 
-    for (int i = 1; i < argc; ++i) {
+    /*for (int i = 1; i < argc; ++i) {
         if (!strcmp("-h", argv[i]) || !strcmp("-?", argv[i])) {
             Usage();
             return 0;
@@ -198,7 +201,8 @@ int main(int argc, char **argv) {
     if (argc < 3 || options.input.empty()) {
         Usage();
         return -1;
-    }
+    }*/
+    options.input = "sb.mps";
 
     std::unique_ptr<draco::PointCloud> pc;
     draco::Mesh *mesh = nullptr;

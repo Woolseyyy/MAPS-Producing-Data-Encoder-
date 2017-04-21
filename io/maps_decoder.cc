@@ -5,30 +5,40 @@
 #include "io/maps_decoder.h"
 #include "io/ply_decoder.h"
 #include <fstream>
-#include<vector>
+#include <vector>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
 
-bool MapsDecoder::DecodeFromFile(const std::string &file_name, Mesh *out_mesh){
-    DecoderBuffer* buffer;
+
+void int2str(const int &int_temp, char* num);
+std::vector<std::string> split(std::basic_string<char, std::char_traits<char>, std::allocator<char>> str, const char* c);
+
+bool MapsDecoder::DecodeFromFile(const std::string &file_name, draco::Mesh *out_mesh){
     readFile(file_name);
-    ProducePlyBuffer(buffer);
-    PlyDecoder ply_decoder;
-    return ply_decoder.DecodeFromBuffer(buffer,out_mesh);
+    ProducePlyBuffer();
+    printf("in!");
+    draco::PlyDecoder ply_decoder;
+    return ply_decoder.DecodeFromBuffer(&buffer_,out_mesh);
 }
 
 void MapsDecoder::readFile(const std::string &file_name){
     std::ifstream file(file_name, std::ios::binary);
-    if (!file)
-        return false;
     //read the number
     char number_line[255];
     file.getline(number_line, 255);
-    vector<string> numbers = split(string(number_line), '\t');
+    std::vector<std::string> numbers = split(std::string(number_line), "\t");
+    strcpy(bv_num_str, numbers[0].c_str());
+    strcpy(sv_num_str, numbers[1].c_str());
+    strcpy(bf_num_str, numbers[2].c_str());
+
     bv_num = atoi(numbers[0].c_str());
     sv_num = atoi(numbers[1].c_str()) - bv_num;
     bf_num = atoi(numbers[2].c_str());
+
+    bv = (char*)malloc(sizeof(char[255])*bv_num);
+    sv = (char*)malloc(sizeof(char[255])*sv_num);
+    bf = (char*)malloc(sizeof(char[255])*bf_num);
 
     //read datas
     char num_buffer[255];
@@ -50,37 +60,36 @@ void MapsDecoder::readFile(const std::string &file_name){
     file.close();
 }
 
-bool MapsDecoder::ProducePlyBuffer(DecoderBuffer* buffer){
-    char temp_num[0];
-    char temp_buffer[] = ""
+bool MapsDecoder::ProducePlyBuffer(){
+    char* temp_buffer = (char*)malloc(sizeof(char[255])*(bv_num+sv_num+bf_num+9));
+
+    strcpy(temp_buffer, ""
             "ply\n"
             "format ascii 1.0\n"
-            "element vertex ";
-    int2str(bv, temp_num);
-    strcat(temp_num, "\n");
-    strcat(temp_buffer, temp_num);
-
+            "element vertex ");
+    strcat(temp_buffer, bv_num_str);
+    strcat(temp_buffer, "\n");
     strcat(temp_buffer, ""
             "property   float32   x\n"
             "property   float32   y\n"
             "property   float32   z\n"
             "element face ");
-    int2str(bf, temp_num);
-    strcat(temp_num, "\n");
-    strcat(temp_buffer, temp_num);
-
+    strcat(temp_buffer, bf_num_str);
+    strcat(temp_buffer, "\n");
     strcat(temp_buffer, ""
             "property list uchar int vertex_indices\n"
             "end_header\n");
 
+    strcat(temp_buffer, bv);
+    strcat(temp_buffer, bf);
+
     buffer_.Init(&temp_buffer[0], strlen(temp_buffer));
-    buffer = &buffer_;
 }
 
-vector<string> split(string& str,const char* c)
+std::vector<std::string> split(std::basic_string<char, std::char_traits<char>, std::allocator<char>> str, const char* c)
 {
     char *cstr, *p;
-    vector<string> res;
+    std::vector<std::string> res;
     cstr = new char[str.size()+1];
     strcpy(cstr,str.c_str());
     p = strtok(cstr,c);
@@ -90,13 +99,4 @@ vector<string> split(string& str,const char* c)
         p = strtok(NULL,c);
     }
     return res;
-}
-
-void int2str(const int &int_temp, char* num)
-{
-    string string_temp;
-    stringstream stream;
-    stream<<int_temp;
-    stream>>string_temp;
-    strcpy(num, string_temp.c_str());
 }
