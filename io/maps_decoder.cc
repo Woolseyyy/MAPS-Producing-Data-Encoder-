@@ -26,7 +26,7 @@ bool MapsDecoder::Decode(draco::Mesh *out_mesh){
 
 bool MapsDecoder::Decode(draco::PointCloud *out_point_cloud){
     draco::PlyDecoder ply_decoder;
-    return ply_decoder.DecodeFromBuffer(&mesh_buffer_,out_point_cloud) ;
+    return ply_decoder.DecodeFromBuffer(&vector_buffer_,out_point_cloud) ;
 }
 
 void MapsDecoder::readFile(const std::string &file_name){
@@ -40,7 +40,7 @@ void MapsDecoder::readFile(const std::string &file_name){
     strcpy(bf_num_str, numbers[2].c_str());
 
     bv_num = atoi(numbers[0].c_str());
-    sv_num = atoi(numbers[1].c_str()) - bv_num;
+    sv_num = atoi(numbers[1].c_str());
     bf_num = atoi(numbers[2].c_str());
 
     bv = (char*)malloc(sizeof(char[255])*bv_num);
@@ -73,7 +73,7 @@ void MapsDecoder::ProducePlyBuffer() {
 }
 
 void MapsDecoder::ProduceMeshPlyBuffer(){
-    char* temp_buffer = (char*)malloc(sizeof(char[255])*(bv_num+sv_num+bf_num+9));
+    char* temp_buffer = (char*)malloc(sizeof(char[255])*(bv_num+bf_num+10));
 
     strcpy(temp_buffer, ""
             "ply\n"
@@ -99,7 +99,7 @@ void MapsDecoder::ProduceMeshPlyBuffer(){
 }
 
 void MapsDecoder::ProduceVectorPlyBuffer(){
-    char* temp_buffer = (char*)malloc(sizeof(char[255])*(bv_num+sv_num+bf_num+9));
+    char* temp_buffer = (char*)malloc(sizeof(char[255])*(sv_num+10));
 
     strcpy(temp_buffer, ""
             "ply\n"
